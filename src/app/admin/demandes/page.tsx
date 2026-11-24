@@ -121,16 +121,20 @@ async function RequestsList() {
                   ))}
                 </ul>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-4 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                   {r.status === "RECEIVED" ? (
                     <>
-                      <form action={confirm}>
-                        <Button type="submit" size="sm">
+                      <form action={confirm} className="sm:contents">
+                        <Button type="submit" className="min-h-12 w-full sm:w-auto">
                           Confirmer (réserver stock)
                         </Button>
                       </form>
-                      <form action={cancel}>
-                        <Button type="submit" size="sm" variant="secondary">
+                      <form action={cancel} className="sm:contents">
+                        <Button
+                          type="submit"
+                          variant="secondary"
+                          className="min-h-12 w-full sm:w-auto"
+                        >
                           Annuler
                         </Button>
                       </form>
@@ -138,13 +142,17 @@ async function RequestsList() {
                   ) : null}
                   {r.status === "CONFIRMED" ? (
                     <>
-                      <form action={fulfill}>
-                        <Button type="submit" size="sm">
+                      <form action={fulfill} className="sm:contents">
+                        <Button type="submit" className="min-h-12 w-full sm:w-auto">
                           Marquer livrée
                         </Button>
                       </form>
-                      <form action={cancel}>
-                        <Button type="submit" size="sm" variant="secondary">
+                      <form action={cancel} className="sm:contents">
+                        <Button
+                          type="submit"
+                          variant="secondary"
+                          className="min-h-12 w-full sm:w-auto"
+                        >
                           Annuler (libérer stock)
                         </Button>
                       </form>

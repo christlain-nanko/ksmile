@@ -127,9 +127,12 @@ function Stat({
   href: string;
 }) {
   return (
-    <Link href={href} className="border border-ksmile-line bg-white p-4 hover:border-ksmile-green">
-      <p className="text-sm text-ksmile-muted">{label}</p>
-      <p className="mt-1 text-2xl font-extrabold text-ksmile-ink">{value}</p>
+    <Link
+      href={href}
+      className="min-h-[5.5rem] border border-ksmile-line bg-white p-4 active:bg-ksmile-green-soft hover:border-ksmile-green"
+    >
+      <p className="text-base text-ksmile-muted">{label}</p>
+      <p className="mt-1 text-3xl font-extrabold text-ksmile-ink">{value}</p>
     </Link>
   );
 }

@@ -63,7 +63,7 @@ export function ProductForm({
           required
           rows={4}
           defaultValue={defaults?.description}
-          className="w-full rounded-md border border-ksmile-line px-3 py-2.5 text-sm outline-none focus:border-ksmile-green"
+          className="min-h-12 w-full rounded-md border border-ksmile-line px-3 py-3 text-base outline-none focus:border-ksmile-green"
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -89,7 +89,7 @@ export function ProductForm({
           name="categorySlug"
           defaultValue={defaultCategory}
           required
-          className="w-full rounded-md border border-ksmile-line px-3 py-2.5 text-sm outline-none focus:border-ksmile-green"
+          className="min-h-12 w-full rounded-md border border-ksmile-line px-3 py-3 text-base outline-none focus:border-ksmile-green"
         >
           {categories.map((c) => (
             <option key={c.slug} value={c.slug}>
@@ -99,51 +99,51 @@ export function ProductForm({
         </select>
       </div>
       <ImageUploadField defaultUrl={defaults?.imageUrl} />
-      <div className="flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-3">
-        <label className="flex items-center gap-2">
+      <div className="grid grid-cols-2 gap-2 text-base sm:flex sm:flex-wrap sm:gap-x-6 sm:gap-y-3">
+        <label className="flex min-h-12 items-center gap-3 rounded-md border border-ksmile-line bg-ksmile-surface/50 px-3">
           <input
             type="checkbox"
             name="isNew"
             defaultChecked={defaults?.isNew}
-            className="size-4 shrink-0 accent-ksmile-green"
+            className="size-5 shrink-0 accent-ksmile-green"
           />
           Nouveau
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex min-h-12 items-center gap-3 rounded-md border border-ksmile-line bg-ksmile-surface/50 px-3">
           <input
             type="checkbox"
             name="pack"
             defaultChecked={defaults?.pack}
-            className="size-4 shrink-0 accent-ksmile-green"
+            className="size-5 shrink-0 accent-ksmile-green"
           />
           Pack
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex min-h-12 items-center gap-3 rounded-md border border-ksmile-line bg-ksmile-surface/50 px-3">
           <input
             type="checkbox"
             name="popular"
             defaultChecked={defaults?.popular}
-            className="size-4 shrink-0 accent-ksmile-green"
+            className="size-5 shrink-0 accent-ksmile-green"
           />
           Populaire
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex min-h-12 items-center gap-3 rounded-md border border-ksmile-line bg-ksmile-surface/50 px-3">
           <input
             type="checkbox"
             name="published"
             defaultChecked={defaults?.published ?? true}
-            className="size-4 shrink-0 accent-ksmile-green"
+            className="size-5 shrink-0 accent-ksmile-green"
           />
           Publié
         </label>
       </div>
       {state.error ? (
-        <p className="text-sm text-ksmile-danger" role="alert">
+        <p className="text-base text-ksmile-danger" role="alert">
           {state.error}
         </p>
       ) : null}
       <div className="border-t border-ksmile-line pt-4">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} className="min-h-12 w-full sm:w-auto">
           {pending ? "Enregistrement…" : submitLabel}
         </Button>
       </div>
@@ -174,9 +174,9 @@ function Field({
         type={type}
         required={required}
         defaultValue={defaultValue}
-        className="w-full rounded-md border border-ksmile-line px-3 py-2.5 text-sm outline-none focus:border-ksmile-green"
+        className="min-h-12 w-full rounded-md border border-ksmile-line px-3 py-3 text-base outline-none focus:border-ksmile-green"
       />
-      {hint ? <p className="mt-1 text-xs text-ksmile-muted">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-sm text-ksmile-muted">{hint}</p> : null}
     </div>
   );
 }

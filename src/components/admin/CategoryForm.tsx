@@ -55,7 +55,7 @@ export function CategoryForm({
           required
           rows={3}
           defaultValue={defaults?.description}
-          className="w-full rounded-md border border-ksmile-line px-3 py-2.5 text-sm outline-none focus:border-ksmile-green"
+          className="min-h-12 w-full rounded-md border border-ksmile-line px-3 py-3 text-base outline-none focus:border-ksmile-green"
         />
       </div>
       <Field
@@ -65,25 +65,25 @@ export function CategoryForm({
         defaultValue={String(defaults?.sortOrder ?? 0)}
       />
       <div>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex min-h-12 items-center gap-3 rounded-md border border-ksmile-line bg-ksmile-surface/50 px-3 text-base">
           <input
             type="checkbox"
             name="inNav"
             defaultChecked={defaults?.inNav ?? true}
-            className="size-4 shrink-0 accent-ksmile-green"
+            className="size-5 shrink-0 accent-ksmile-green"
           />
           Afficher dans le menu / raccourcis
         </label>
       </div>
 
       {state.error ? (
-        <p className="text-sm text-ksmile-danger" role="alert">
+        <p className="text-base text-ksmile-danger" role="alert">
           {state.error}
         </p>
       ) : null}
 
       <div className="border-t border-ksmile-line pt-4">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} className="min-h-12 w-full sm:w-auto">
           {pending ? "Enregistrement…" : submitLabel}
         </Button>
       </div>
@@ -114,9 +114,9 @@ function Field({
         type={type}
         required={required}
         defaultValue={defaultValue}
-        className="w-full rounded-md border border-ksmile-line px-3 py-2.5 text-sm outline-none focus:border-ksmile-green"
+        className="min-h-12 w-full rounded-md border border-ksmile-line px-3 py-3 text-base outline-none focus:border-ksmile-green"
       />
-      {hint ? <p className="mt-1 text-xs text-ksmile-muted">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-sm text-ksmile-muted">{hint}</p> : null}
     </div>
   );
 }
