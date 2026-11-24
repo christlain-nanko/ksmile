@@ -54,12 +54,14 @@ services:
       retries: 10
       start_period: 40s
 
-  # Dump Postgres chaque soir → Cloudinary (raw)
+  # Dump Postgres → Cloudinary (raw). Lancer via cron :
+  # docker compose --profile backup run --rm backup node /app/backup.mjs
   backup:
+    profiles: ["backup"]
     build:
       context: ./docker/backup
       dockerfile: Dockerfile
-    restart: unless-stopped
+    restart: "no"
     depends_on:
       db:
         condition: service_healthy
