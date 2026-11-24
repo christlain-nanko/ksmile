@@ -10,14 +10,43 @@ const body = Manrope({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+
+const siteTitle = "Ksmile · Beauté, soins & essentiels";
+const siteDescription =
+  "Catalogue de droguerie en ligne au Cameroun (Odza). Hygiène, beauté, cheveux, bébé et maison. Préparez votre panier, nous confirmons votre demande.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Ksmile · Beauté, soins & essentiels",
+    default: siteTitle,
     template: "%s · Ksmile",
   },
-  description:
-    "Catalogue de droguerie en ligne au Cameroun. Hygiène, beauté, cheveux, bébé et maison. Préparez votre panier, nous confirmons votre demande.",
+  description: siteDescription,
   applicationName: "Ksmile",
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: siteUrl,
+    siteName: "Ksmile",
+    title: siteTitle,
+    description: siteDescription,
+    images: [
+      {
+        url: "/og-share.png",
+        width: 1200,
+        height: 630,
+        alt: "Catalogue Ksmile — beauté, soins et essentiels",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+    images: ["/og-share.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
