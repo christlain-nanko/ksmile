@@ -40,6 +40,12 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
             <AdminNav href="/admin/demandes">Demandes</AdminNav>
           </nav>
           <div className="ml-auto flex items-center gap-3 text-sm">
+            <Link
+              href="/"
+              className="rounded-md border border-ksmile-line bg-white px-3 py-1.5 font-semibold text-ksmile-green hover:border-ksmile-green"
+            >
+              Voir la boutique
+            </Link>
             <span className="text-ksmile-muted">{session.user.email}</span>
             <form
               action={async () => {

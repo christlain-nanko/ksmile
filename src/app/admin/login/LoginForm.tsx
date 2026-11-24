@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 export function AdminLoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const [email, setEmail] = useState("admin@ksmile.cm");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -73,6 +73,9 @@ export function AdminLoginForm() {
           ) : null}
           <Button type="submit" fullWidth disabled={loading}>
             {loading ? "Connexion…" : "Se connecter"}
+          </Button>
+          <Button href="/" variant="secondary" fullWidth>
+            Retour à la boutique
           </Button>
         </form>
       </div>
