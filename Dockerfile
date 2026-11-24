@@ -15,9 +15,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-# Placeholders pour le build (les vraies valeurs viennent du compose au runtime)
+# NEXT_PUBLIC_* est figé au build — passer les vraies URLs via --build-arg
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
+ARG AUTH_URL=http://localhost:3000
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV AUTH_URL=$AUTH_URL
 ENV AUTH_SECRET=build-time-placeholder
-ENV AUTH_URL=http://localhost:3000
 ENV DATABASE_URL=postgresql://ksmile:ksmile@localhost:5432/ksmile?schema=public
 RUN npx prisma generate
 RUN npm run build
