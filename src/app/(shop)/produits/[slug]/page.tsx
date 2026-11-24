@@ -11,14 +11,9 @@ import {
   getProductBySlug,
   getProductsByCategory,
 } from "@/lib/catalog";
-import { products as staticProducts } from "@/data/demo";
 import type { Metadata } from "next";
 
 type Params = Promise<{ slug: string }>;
-
-export function generateStaticParams() {
-  return staticProducts.map((p) => ({ slug: p.slug }));
-}
 
 export async function generateMetadata({
   params,

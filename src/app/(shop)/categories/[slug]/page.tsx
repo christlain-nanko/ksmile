@@ -11,16 +11,11 @@ import {
   getProductsByCategory,
   sortProducts,
 } from "@/lib/catalog";
-import { categories as staticCategories } from "@/data/demo";
 import type { SortOption } from "@/types";
 import type { Metadata } from "next";
 
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ tri?: string }>;
-
-export function generateStaticParams() {
-  return staticCategories.map((c) => ({ slug: c.slug }));
-}
 
 export async function generateMetadata({
   params,

@@ -5,6 +5,24 @@ import type { Category, Product, ProductVariant, SortOption } from "@/types";
 
 export const CATALOG_CACHE_TAG = "catalog";
 
+/** Pendant `docker build` il n’y a pas de Postgres : on renvoie vide au lieu de faire échouer le build. */
+async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (
+      msg.includes("Can't reach database server") ||
+      msg.includes("PrismaClientInitializationError") ||
+      msg.includes("P1001")
+    ) {
+      console.warn("[catalog] DB indisponible (build/offline), fallback.");
+      return fallback;
+    }
+    throw err;
+  }
+}
+
 function mapCategory(c: {
   id: string;
   slug: string;
@@ -86,157 +104,179 @@ const productInclude = {
 export async function getCategories(): Promise<Category[]> {
   "use cache";
   cacheTag(CATALOG_CACHE_TAG);
-  const rows = await prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
-  return rows.map(mapCategory);
+  return safeQuery(async () => {
+    const rows = await prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
+    return rows.map(mapCategory);
+  }, []);
 }
 
 export async function getNavCategories(): Promise<Category[]> {
   "use cache";
   cacheTag(CATALOG_CACHE_TAG);
-  const rows = await prisma.category.findMany({
-    where: { inNav: true },
-    orderBy: { sortOrder: "asc" },
-  });
-  return rows.map(mapCategory);
+  return safeQuery(async () => {
+    const rows = await prisma.category.findMany({
+      where: { inNav: true },
+      orderBy: { sortOrder: "asc" },
+    });
+    return rows.map(mapCategory);
+  }, []);
 }
 
 export async function getCategory(slug: string): Promise<Category | undefined> {
   "use cache";
   cacheTag(CATALOG_CACHE_TAG);
-  const normalized = normalizeCategorySlug(slug);
-  const row = await prisma.category.findFirst({
-    where: {
-      OR: [{ slug: normalized }, { slug: normalized.replaceAll("-", "_") }],
-    },
-  });
-  return row ? mapCategory(row) : undefined;
+  return safeQuery(async () => {
+    const normalized = normalizeCategorySlug(slug);
+    const row = await prisma.category.findFirst({
+      where: {
+        OR: [{ slug: normalized }, { slug: normalized.replaceAll("-", "_") }],
+      },
+    });
+    return row ? mapCategory(row) : undefined;
+  }, undefined);
 }
 
 export async function getAllProducts(): Promise<Product[]> {
   "use cache";
   cacheTag(CATALOG_CACHE_TAG);
-  const rows = await prisma.product.findMany({
-    where: { published: true },
-    include: productInclude,
-    orderBy: { name: "asc" },
-  });
-  return rows.map(mapProduct);
-}
-
-export async function getProductBySlug(slug: string): Promise<Product | undefined> {
-  "use cache";
-  cacheTag(CATALOG_CACHE_TAG);
-  const row = await prisma.product.findFirst({
-    where: { slug, published: true },
-    include: productInclude,
-  });
-  return row ? mapProduct(row) : undefined;
-}
-
-export async function getProductById(id: string): Promise<Product | undefined> {
-  "use cache";
-  cacheTag(CATALOG_CACHE_TAG);
-  const row = await prisma.product.findUnique({
-    where: { id },
-    include: productInclude,
-  });
-  return row ? mapProduct(row) : undefined;
-}
-
-export async function getProductsByCategory(slug: string): Promise<Product[]> {
-  "use cache";
-  cacheTag(CATALOG_CACHE_TAG);
-  const normalized = normalizeCategorySlug(slug);
-
-  if (normalized === "nouveautes") {
-    const rows = await prisma.product.findMany({
-      where: { published: true, isNew: true },
-      include: productInclude,
-      orderBy: { updatedAt: "desc" },
-    });
-    return rows.map(mapProduct);
-  }
-  if (normalized === "packs-offres") {
-    const rows = await prisma.product.findMany({
-      where: { published: true, pack: true },
-      include: productInclude,
-      orderBy: { name: "asc" },
-    });
-    return rows.map(mapProduct);
-  }
-
-  const rows = await prisma.product.findMany({
-    where: {
-      published: true,
-      category: {
-        OR: [
-          { slug: normalized },
-          { slug: normalized.replaceAll("-", "_") },
-        ],
-      },
-    },
-    include: productInclude,
-    orderBy: { name: "asc" },
-  });
-  return rows.map(mapProduct);
-}
-
-export async function getPopularProducts(): Promise<Product[]> {
-  "use cache";
-  cacheTag(CATALOG_CACHE_TAG);
-  const rows = await prisma.product.findMany({
-    where: { published: true, popular: true },
-    include: productInclude,
-    take: 12,
-  });
-  return rows.map(mapProduct);
-}
-
-export async function getNewProducts(): Promise<Product[]> {
-  "use cache";
-  cacheTag(CATALOG_CACHE_TAG);
-  const rows = await prisma.product.findMany({
-    where: { published: true, isNew: true },
-    include: productInclude,
-    orderBy: { updatedAt: "desc" },
-  });
-  return rows.map(mapProduct);
-}
-
-export async function getPacks(): Promise<Product[]> {
-  "use cache";
-  cacheTag(CATALOG_CACHE_TAG);
-  const rows = await prisma.product.findMany({
-    where: { published: true, pack: true },
-    include: productInclude,
-  });
-  return rows.map(mapProduct);
-}
-
-export async function searchProducts(query: string): Promise<Product[]> {
-  "use cache";
-  cacheTag(CATALOG_CACHE_TAG);
-  const q = query.trim();
-  if (!q) {
+  return safeQuery(async () => {
     const rows = await prisma.product.findMany({
       where: { published: true },
       include: productInclude,
       orderBy: { name: "asc" },
     });
     return rows.map(mapProduct);
-  }
-  const rows = await prisma.product.findMany({
-    where: {
-      published: true,
-      OR: [
-        { name: { contains: q, mode: "insensitive" } },
-        { brand: { contains: q, mode: "insensitive" } },
-        { description: { contains: q, mode: "insensitive" } },
-      ],
-    },
-    include: productInclude,
-  });
-  return rows.map(mapProduct);
+  }, []);
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  "use cache";
+  cacheTag(CATALOG_CACHE_TAG);
+  return safeQuery(async () => {
+    const row = await prisma.product.findFirst({
+      where: { slug, published: true },
+      include: productInclude,
+    });
+    return row ? mapProduct(row) : undefined;
+  }, undefined);
+}
+
+export async function getProductById(id: string): Promise<Product | undefined> {
+  "use cache";
+  cacheTag(CATALOG_CACHE_TAG);
+  return safeQuery(async () => {
+    const row = await prisma.product.findUnique({
+      where: { id },
+      include: productInclude,
+    });
+    return row ? mapProduct(row) : undefined;
+  }, undefined);
+}
+
+export async function getProductsByCategory(slug: string): Promise<Product[]> {
+  "use cache";
+  cacheTag(CATALOG_CACHE_TAG);
+  return safeQuery(async () => {
+    const normalized = normalizeCategorySlug(slug);
+
+    if (normalized === "nouveautes") {
+      const rows = await prisma.product.findMany({
+        where: { published: true, isNew: true },
+        include: productInclude,
+        orderBy: { updatedAt: "desc" },
+      });
+      return rows.map(mapProduct);
+    }
+    if (normalized === "packs-offres") {
+      const rows = await prisma.product.findMany({
+        where: { published: true, pack: true },
+        include: productInclude,
+        orderBy: { name: "asc" },
+      });
+      return rows.map(mapProduct);
+    }
+
+    const rows = await prisma.product.findMany({
+      where: {
+        published: true,
+        category: {
+          OR: [
+            { slug: normalized },
+            { slug: normalized.replaceAll("-", "_") },
+          ],
+        },
+      },
+      include: productInclude,
+      orderBy: { name: "asc" },
+    });
+    return rows.map(mapProduct);
+  }, []);
+}
+
+export async function getPopularProducts(): Promise<Product[]> {
+  "use cache";
+  cacheTag(CATALOG_CACHE_TAG);
+  return safeQuery(async () => {
+    const rows = await prisma.product.findMany({
+      where: { published: true, popular: true },
+      include: productInclude,
+      take: 12,
+    });
+    return rows.map(mapProduct);
+  }, []);
+}
+
+export async function getNewProducts(): Promise<Product[]> {
+  "use cache";
+  cacheTag(CATALOG_CACHE_TAG);
+  return safeQuery(async () => {
+    const rows = await prisma.product.findMany({
+      where: { published: true, isNew: true },
+      include: productInclude,
+      orderBy: { updatedAt: "desc" },
+    });
+    return rows.map(mapProduct);
+  }, []);
+}
+
+export async function getPacks(): Promise<Product[]> {
+  "use cache";
+  cacheTag(CATALOG_CACHE_TAG);
+  return safeQuery(async () => {
+    const rows = await prisma.product.findMany({
+      where: { published: true, pack: true },
+      include: productInclude,
+    });
+    return rows.map(mapProduct);
+  }, []);
+}
+
+export async function searchProducts(query: string): Promise<Product[]> {
+  "use cache";
+  cacheTag(CATALOG_CACHE_TAG);
+  return safeQuery(async () => {
+    const q = query.trim();
+    if (!q) {
+      const rows = await prisma.product.findMany({
+        where: { published: true },
+        include: productInclude,
+        orderBy: { name: "asc" },
+      });
+      return rows.map(mapProduct);
+    }
+    const rows = await prisma.product.findMany({
+      where: {
+        published: true,
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { brand: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+        ],
+      },
+      include: productInclude,
+    });
+    return rows.map(mapProduct);
+  }, []);
 }
 
 export function sortProducts(list: Product[], tri: SortOption): Product[] {
