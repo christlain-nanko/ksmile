@@ -4,6 +4,8 @@ import { HowItWorksStrip } from "@/components/layout/HowItWorksStrip";
 import { CartProvider } from "@/lib/cart";
 import { getNavCategories } from "@/lib/catalog";
 
+export const instant = false;
+
 export default async function ShopLayout({
   children,
 }: {
