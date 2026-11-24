@@ -1,0 +1,2 @@
+# Tous les soirs à 23:00 (heure Cameroun)
+0 23 * * * node /app/backup.mjs

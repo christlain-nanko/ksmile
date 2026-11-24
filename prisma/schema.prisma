@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RequestStatus {
+  RECEIVED
+  CONFIRMED
+  CANCELLED
+  FULFILLED
+}
+
+enum StockMovementType {
+  REPLENISHMENT
+  RESERVATION
+  RELEASE
+  SALE_DELIVERY
+  OFFSITE_SALE
+  RETURN
+  CORRECTION
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  stockMovements StockMovement[]
+  requestsHandled OrderRequest[] @relation("HandledBy")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  shortName   String
+  description String
+  sortOrder   Int      @default(0)
+  inNav       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  brand           String
+  name            String
+  description     String
+  format          String
+  priceFcfa       Int
+  isNew           Boolean      @default(false)
+  pack            Boolean      @default(false)
+  popular         Boolean      @default(false)
+  published       Boolean      @default(true)
+  /// Stock physique en magasin/entrepôt
+  physicalStock   Int          @default(0)
+  /// Quantités réservées après confirmation admin
+  reservedStock   Int          @default(0)
+  imageUrl        String?
+  categoryId      String
+  category        Category     @relation(fields: [categoryId], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  variants       ProductVariant[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+
+  @@index([categoryId])
+  @@index([published])
+}
+
+model ProductVariant {
+  id            String  @id @default(cuid())
+  productId     String
+  product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label         String
+  format        String
+  priceFcfa     Int
+  physicalStock Int     @default(0)
+  reservedStock Int     @default(0)
+
+  orderItems OrderItem[]
+
+  @@index([productId])
+}
+
+model OrderRequest {
+  id          String        @id @default(cuid())
+  reference   String        @unique
+  status      RequestStatus @default(RECEIVED)
+  customerName String
+  phone       String
+  city        String
+  quartier    String
+  note        String?
+  subtotalFcfa Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  confirmedAt DateTime?
+  fulfilledAt DateTime?
+  cancelledAt DateTime?
+  handledById String?
+  handledBy   AdminUser?    @relation("HandledBy", fields: [handledById], references: [id])
+
+  items OrderItem[]
+
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  requestId String
+  request   OrderRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  quantity  Int
+  unitPriceFcfa Int
+  productName String
+  format    String
+}
+
+model StockMovement {
+  id          String            @id @default(cuid())
+  productId   String
+  product     Product           @relation(fields: [productId], references: [id])
+  type        StockMovementType
+  quantity    Int
+  reason      String
+  createdAt   DateTime          @default(now())
+  adminId     String?
+  admin       AdminUser?        @relation(fields: [adminId], references: [id])
+
+  @@index([productId])
+  @@index([createdAt])
+}
